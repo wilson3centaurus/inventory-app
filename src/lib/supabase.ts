@@ -1,32 +1,22 @@
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/database-types";
 
-type AppSchema = "sokoflow_inventory";
-type DatabaseShape = Record<string, never>;
+const schema = "sokoflow_inventory" as const;
 
-function initializeClient(url: string, anonKey: string, schema: AppSchema) {
-  return createClient<DatabaseShape, AppSchema>(url, anonKey, {
-    db: { schema },
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  });
-}
-
-let browserClient: ReturnType<typeof initializeClient> | null = null;
+let browserClient: ReturnType<typeof createClient<Database, typeof schema>> | null = null;
 
 export function getSupabaseBrowserClient() {
   if (browserClient) return browserClient;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const schema = (process.env.NEXT_PUBLIC_SUPABASE_SCHEMA ?? "sokoflow_inventory") as AppSchema;
 
-  if (!url || !anonKey) {
-    throw new Error("Missing Supabase browser environment variables.");
-  }
+  if (!url || !anonKey) throw new Error("Missing Supabase browser environment variables.");
 
-  browserClient = initializeClient(url, anonKey, schema);
+  browserClient = createClient<Database, typeof schema>(url, anonKey, {
+    db: { schema },
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  });
 
   return browserClient;
 }

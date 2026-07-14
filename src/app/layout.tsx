@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
+import { WorkspaceProvider } from "@/components/workspace-provider";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { DEFAULT_APP_NAME } from "@/lib/app-settings";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SokoFlow",
+  title: DEFAULT_APP_NAME,
   description:
     "Mobile-first inventory PWA for Zimbabwean SMEs with offline-first workflows and self-hosted Supabase.",
   manifest: "/manifest.webmanifest",
-  applicationName: "SokoFlow",
+  applicationName: DEFAULT_APP_NAME,
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "SokoFlow",
+    title: DEFAULT_APP_NAME,
   },
   icons: {
     icon: "/icon.svg",
@@ -26,9 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
-        <ServiceWorkerRegister />
-        {children}
+      <body className="min-h-full">
+        <WorkspaceProvider>
+          <ServiceWorkerRegister />
+          {children}
+        </WorkspaceProvider>
       </body>
     </html>
   );

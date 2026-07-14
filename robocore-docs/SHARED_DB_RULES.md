@@ -37,11 +37,12 @@ Every project on this server lives in its own PostgreSQL schema. The list below 
 | `smartschools` | SmartSchools project | Active |
 | `azim_motors` | Azim Motors workshop management | Active |
 | `icecream_erp` | Absolute Ice Cream Manufacturing ERP | Active |
+| `sokoflow_inventory` | StockFlow inventory PWA | Active |
 
 The full canonical `pgrst.db_schemas` value (what PostgREST must be told about) is:
 
 ```text
-public,storage,graphql_public,robocore,robokorda,aura,smartschools,azim_motors,icecream_erp
+public,storage,graphql_public,robocore,robokorda,aura,smartschools,azim_motors,icecream_erp,sokoflow_inventory
 ```
 
 If you add a new schema, append it to this list. **Never replace this list with only your schema.**
@@ -487,4 +488,4 @@ This document must be updated when:
 - Server infrastructure changes (new container versions, new VPS, etc.)
 - A new incident occurs that reveals a new failure mode
 
-**Last updated:** June 7, 2026 — Added `icecream_erp` schema for Absolute Ice Cream Manufacturing ERP.
+**Last updated:** July 14, 2026 - Activated the `sokoflow_inventory` schema for StockFlow.

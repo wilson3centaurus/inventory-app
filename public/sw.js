@@ -1,4 +1,4 @@
-const CACHE_NAME = "sokoflow-shell-v1";
+const CACHE_NAME = "stockflow-shell-v2";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/maskable-icon.svg", "/apple-touch-icon.svg"];
 
 self.addEventListener("install", (event) => {
