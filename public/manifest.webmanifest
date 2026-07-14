@@ -1,0 +1,25 @@
+{
+  "name": "SokoFlow",
+  "short_name": "SokoFlow",
+  "description": "Offline-first inventory PWA for Zimbabwean SMEs.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4efe4",
+  "theme_color": "#c96d1b",
+  "lang": "en-ZW",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
