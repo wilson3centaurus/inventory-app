@@ -1,0 +1,49 @@
+{
+  "packageId": "zw.co.stockflow.app",
+  "host": "inventory-app-one-ecru.vercel.app",
+  "name": "StockFlow",
+  "launcherName": "StockFlow",
+  "display": "standalone",
+  "themeColor": "#173F35",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#F4F5EF",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://inventory-app-one-ecru.vercel.app/icon-512.png",
+  "maskableIconUrl": "https://inventory-app-one-ecru.vercel.app/maskable-icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\XO\\Desktop\\inventory-app\\android-twa\\android.keystore",
+    "alias": "stockflow"
+  },
+  "appVersionName": "3",
+  "appVersionCode": 3,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://inventory-app-one-ecru.vercel.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://inventory-app-one-ecru.vercel.app/",
+  "minSdkVersion": 21,
+  "orientation": "portrait-primary",
+  "fingerprints": [
+    "EE:3F:CC:59:D4:E8:56:2F:84:52:A4:19:97:D9:CB:9A:1C:C9:64:FB:41:A3:D3:88:4B:42:D9:B6:9E:EA:BD:6F"
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "3"
+}

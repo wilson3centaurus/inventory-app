@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "zw.co.stockflow.app",
+      "sha256_cert_fingerprints": [
+        "EE:3F:CC:59:D4:E8:56:2F:84:52:A4:19:97:D9:CB:9A:1C:C9:64:FB:41:A3:D3:88:4B:42:D9:B6:9E:EA:BD:6F"
+      ]
+    }
+  }
+]

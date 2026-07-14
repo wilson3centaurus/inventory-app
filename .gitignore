@@ -19,6 +19,18 @@
 
 # production
 /build
+/android-twa/.gradle
+/android-twa/build
+/android-twa/app/build
+/android-twa/*.keystore
+/android-twa/*.jks
+/android-twa/.signing.env
+/.gradle
+/app/build
+/app-release-*.apk
+/app-release-*.aab
+/app-release-*.idsig
+/hs_err_pid*.log
 
 # misc
 .DS_Store

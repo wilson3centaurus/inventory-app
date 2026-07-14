@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Cloud, CloudOff, RefreshCw, Settings } from "lucide-react";
 import { useWorkspace } from "@/components/workspace-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AppHeader({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) {
   const { currentUser, workspace, loadingData, databaseMessage, refreshWorkspace } = useWorkspace();
@@ -16,7 +17,8 @@ export function AppHeader({ title, description, action }: { title: string; descr
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {action}
-          <button aria-label="Refresh data" type="button" onClick={() => void refreshWorkspace()} className="grid size-10 place-items-center rounded-[14px] border border-border bg-white text-muted shadow-sm"><RefreshCw className={`size-4 ${loadingData ? "animate-spin" : ""}`} /></button>
+          <ThemeToggle />
+          <button aria-label="Refresh data" type="button" onClick={() => void refreshWorkspace()} className="grid size-10 place-items-center rounded-[14px] border border-border bg-surface text-muted shadow-sm active:bg-surface-strong"><RefreshCw className={`size-4 ${loadingData ? "animate-spin" : ""}`} /></button>
           <Link aria-label="Settings" href={currentUser?.role === "OWNER" ? "/settings" : "/profile"} className="grid size-10 place-items-center rounded-[14px] bg-primary text-white"><Settings className="size-4" /></Link>
         </div>
       </header>

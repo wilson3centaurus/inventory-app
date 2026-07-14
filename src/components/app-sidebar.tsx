@@ -34,7 +34,7 @@ export function AppSidebar() {
       <nav className="mt-7 flex flex-1 flex-col gap-1">
         {allowed.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
-          return <Link key={href} href={href} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold transition ${active ? "bg-white text-primary" : "text-white/68 hover:bg-white/8 hover:text-white"}`}><Icon className="size-[17px]" /><span className="flex-1">{label}</span>{active ? <ChevronRight className="size-3.5" /> : null}</Link>;
+          return <Link key={href} href={href} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold transition ${active ? "bg-surface text-brand-text" : "text-white/68 hover:bg-white/8 hover:text-white"}`}><Icon className="size-[17px]" /><span className="flex-1">{label}</span>{active ? <ChevronRight className="size-3.5" /> : null}</Link>;
         })}
       </nav>
       <div className="rounded-[18px] bg-white/8 p-3">
@@ -54,7 +54,7 @@ export function MobileNav() {
     <nav aria-label="Primary navigation" className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[22px] border border-white/10 bg-primary/95 p-1.5 text-white shadow-[0_16px_45px_rgba(14,45,38,.3)] backdrop-blur-xl lg:hidden" style={{ paddingBottom: "max(.375rem, env(safe-area-inset-bottom))" }}>
       {items.map(({ href, shortLabel, icon: Icon }) => {
         const active = pathname === href;
-        return <Link key={href} href={href} className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-2xl text-[9px] font-bold transition ${active ? "bg-white text-primary" : "text-white/60"}`}><Icon className="size-[17px]" strokeWidth={active ? 2.5 : 2} /><span>{shortLabel}</span>{href === "/sales" ? <span className="absolute -top-2 grid size-5 place-items-center rounded-full bg-accent text-[15px] leading-none text-primary">+</span> : null}</Link>;
+        return <Link key={href} href={href} className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-2xl text-[9px] font-bold transition ${active ? "bg-surface text-brand-text" : "text-white/60"}`}><Icon className="size-[17px]" strokeWidth={active ? 2.5 : 2} /><span>{shortLabel}</span>{href === "/sales" ? <span className="absolute -top-2 grid size-5 place-items-center rounded-full bg-accent text-[15px] leading-none text-accent-ink">+</span> : null}</Link>;
       })}
     </nav>
   );

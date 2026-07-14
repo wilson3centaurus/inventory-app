@@ -57,8 +57,8 @@ export default function InventoryPage() {
       {feedback ? <button type="button" onClick={() => setFeedback("")} className="mt-2 flex w-full items-center justify-between rounded-xl bg-primary/6 px-3 py-2 text-left text-[10px] text-primary"><span>{feedback}</span><X className="size-3" /></button> : null}
 
       <div className="mt-3 flex items-center gap-2 overflow-x-auto scrollbar-none">
-        <button type="button" onClick={() => setFilter("all")} className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${filter === "all" ? "bg-primary text-white" : "border border-border bg-white text-muted"}`}>All items · {workspace.products.length}</button>
-        <button type="button" onClick={() => setFilter("low")} className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${filter === "low" ? "bg-danger text-white" : "border border-border bg-white text-muted"}`}>Low stock · {lowCount}</button>
+        <button type="button" onClick={() => setFilter("all")} className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${filter === "all" ? "bg-primary text-white" : "border border-border bg-surface text-muted"}`}>All items · {workspace.products.length}</button>
+        <button type="button" onClick={() => setFilter("low")} className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${filter === "low" ? "bg-danger text-white" : "border border-border bg-surface text-muted"}`}>Low stock · {lowCount}</button>
         <span className="ml-auto hidden items-center gap-1 text-[10px] text-muted sm:flex"><SlidersHorizontal className="size-3" /> Live stock</span>
       </div>
 

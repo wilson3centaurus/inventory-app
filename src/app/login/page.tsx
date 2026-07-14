@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Boxes, CheckCircle2, CloudOff, LockKeyhole, ScanLine, Sparkles } from "lucide-react";
 import { useWorkspace } from "@/components/workspace-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,6 +40,7 @@ export default function LoginPage() {
 
   return (
     <main className="grid min-h-dvh bg-primary lg:grid-cols-[1.05fr_.95fr]">
+      <ThemeToggle className="fixed right-4 top-4 z-20 lg:right-6 lg:top-6" />
       <section className="relative hidden overflow-hidden p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
         <div className="absolute -right-44 -top-44 size-[34rem] rounded-full border-[80px] border-accent/8" />
         <div className="relative flex items-center gap-3"><span className="grid size-10 place-items-center rounded-[15px] bg-accent text-primary"><Sparkles className="size-5" /></span><div><p className="text-base font-extrabold">{workspace.settings.appName || "StockFlow"}</p><p className="text-[9px] uppercase tracking-[.18em] text-white/45">The shop operating system</p></div></div>
