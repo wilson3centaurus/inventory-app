@@ -69,8 +69,22 @@ export default function LoginPage() {
             <p className="mt-1 text-[10px] uppercase tracking-[.22em] text-muted">The shop operating system</p>
           </div>
           {!checking ? <div className="mb-5 grid grid-cols-2 gap-2 rounded-[18px] border border-border bg-surface-soft p-1.5">
-            <button type="button" onClick={() => switchMode("login")} className={`rounded-[14px] px-3 py-2.5 text-[11px] font-extrabold transition ${mode === "login" ? "bg-primary text-white shadow-sm" : "text-muted"}`}>Sign in</button>
-            <button type="button" onClick={() => switchMode("setup")} className={`rounded-[14px] px-3 py-2.5 text-[11px] font-extrabold transition ${mode === "setup" ? "bg-accent text-accent-ink shadow-sm" : "text-muted"}`}><span className="inline-flex items-center gap-1.5"><Building2 className="size-3.5" /> Create business</span></button>
+            <button
+              type="button"
+              onClick={() => switchMode("login")}
+              className="rounded-[14px] px-3 py-2.5 text-[11px] font-extrabold transition"
+              style={mode === "login" ? { background: "var(--primary)", color: "#ffffff", boxShadow: "var(--shadow)" } : { color: "var(--muted)" }}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode("setup")}
+              className="rounded-[14px] px-3 py-2.5 text-[11px] font-extrabold transition"
+              style={mode === "setup" ? { background: "var(--accent)", color: "var(--accent-ink)", boxShadow: "var(--shadow)" } : { color: "var(--muted)" }}
+            >
+              <span className="inline-flex items-center gap-1.5"><Building2 className="size-3.5" /> Create business</span>
+            </button>
           </div> : null}
           <p className="eyebrow">{mode === "setup" ? "First-time setup" : "Secure workspace"}</p><h1 className="mt-2 text-[30px] font-extrabold tracking-[-.045em]">{mode === "setup" ? "Open your shop." : "Welcome back."}</h1><p className="mt-2 text-xs leading-5 text-muted">{mode === "setup" ? "Create the owner account and your real database workspace." : "Sign in with your StockFlow account."}</p>
           {setupError ? <div className="mt-4 rounded-[16px] border border-danger/20 bg-danger/7 p-3 text-[10px] leading-5 text-danger"><CloudOff className="mr-1 inline size-3.5" /> {setupError} Apply migrations `001` and `002`, including the additive PostgREST schema registration.</div> : null}
