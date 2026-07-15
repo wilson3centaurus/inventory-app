@@ -18,6 +18,9 @@
   --warning: #d89023;
   --muted: #68766f;
   --brand-text: #173f35;
+  --nav-inactive: rgba(255, 255, 255, 0.82);
+  --nav-active-bg: #c8ed5a;
+  --nav-active-text: #17230c;
   --shadow: 0 1px 2px rgba(23, 35, 31, 0.04), 0 10px 28px rgba(23, 35, 31, 0.06);
 }
 
@@ -56,6 +59,9 @@ html[data-theme="dark"] {
   --warning: #f4b451;
   --muted: #9aa9a1;
   --brand-text: #9ed7c3;
+  --nav-inactive: rgba(255, 255, 255, 0.74);
+  --nav-active-bg: #20362d;
+  --nav-active-text: #eef5ef;
   --shadow: 0 1px 2px rgba(0, 0, 0, .18), 0 16px 38px rgba(0, 0, 0, .2);
 }
 
@@ -70,6 +76,7 @@ body {
   font-family: var(--font-sans);
   font-size: 14px;
   min-height: 100dvh;
+  overflow-x: hidden;
 }
 button, input, select, textarea { font: inherit; color: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -111,10 +118,12 @@ a { color: inherit; text-decoration: none; }
 .eyebrow { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
-.safe-bottom { padding-bottom: max(5.75rem, calc(4.75rem + env(safe-area-inset-bottom))); }
+.safe-bottom { padding-bottom: max(7.25rem, calc(6rem + env(safe-area-inset-bottom))); }
+.mobile-sheet-padding { padding-bottom: max(6rem, calc(5.25rem + env(safe-area-inset-bottom))); }
 
 @media (min-width: 1024px) {
   .safe-bottom { padding-bottom: 1.5rem; }
+  .mobile-sheet-padding { padding-bottom: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

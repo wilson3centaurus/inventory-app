@@ -51,10 +51,10 @@ export function MobileNav() {
   const { currentUser } = useWorkspace();
   const items = navItems.filter((item) => currentUser && item.roles.includes(currentUser.role) && ["/dashboard", "/inventory", "/sales", "/reports", "/profile"].includes(item.href));
   return (
-    <nav aria-label="Primary navigation" className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[22px] border border-white/10 bg-primary/95 p-1.5 text-white shadow-[0_16px_45px_rgba(14,45,38,.3)] backdrop-blur-xl lg:hidden" style={{ paddingBottom: "max(.375rem, env(safe-area-inset-bottom))" }}>
+    <nav aria-label="Primary navigation" className="fixed inset-x-3 bottom-3 z-50 grid grid-cols-5 rounded-[22px] border border-white/10 bg-primary/95 p-1.5 text-white shadow-[0_16px_45px_rgba(14,45,38,.3)] backdrop-blur-xl lg:hidden" style={{ paddingBottom: "max(.45rem, env(safe-area-inset-bottom))" }}>
       {items.map(({ href, shortLabel, icon: Icon }) => {
         const active = pathname === href;
-        return <Link key={href} href={href} className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-2xl text-[9px] font-bold transition ${active ? "bg-surface text-brand-text" : "text-white/60"}`}><Icon className="size-[17px]" strokeWidth={active ? 2.5 : 2} /><span>{shortLabel}</span>{href === "/sales" ? <span className="absolute -top-2 grid size-5 place-items-center rounded-full bg-accent text-[15px] leading-none text-accent-ink">+</span> : null}</Link>;
+        return <Link key={href} href={href} className={`relative flex min-h-[3.35rem] flex-col items-center justify-center gap-1 rounded-[18px] px-1 text-[10px] font-extrabold transition ${active ? "shadow-sm" : ""}`} style={{ background: active ? "var(--nav-active-bg)" : "transparent", color: active ? "var(--nav-active-text)" : "var(--nav-inactive)" }}><Icon className="size-[17px]" strokeWidth={active ? 2.5 : 2.15} /><span>{shortLabel}</span>{href === "/sales" ? <span className={`absolute -top-2 grid size-5 place-items-center rounded-full text-[15px] leading-none ${active ? "bg-primary text-white" : "bg-accent text-accent-ink"}`}>+</span> : null}</Link>;
       })}
     </nav>
   );
