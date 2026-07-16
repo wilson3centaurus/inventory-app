@@ -23,11 +23,14 @@ export async function POST(request: Request) {
         <p style="color:#68766f;font-size:12px">Generated from live StockFlow data on ${new Date().toLocaleDateString("en-ZW", { dateStyle: "long" })}.</p>
       </div>`;
 
+    const fromAddress = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+    const from = fromAddress.includes("<") ? fromAddress : `Tafadzwa Wilson Sedze <${fromAddress}>`;
+
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.RESEND_FROM_EMAIL ?? "StockFlow Reports <onboarding@resend.dev>",
+        from,
         reply_to: "tafadzwawilsonsedze@gmail.com",
         to: [workspace.settings.reportEmail || "tafadzwawilsonsedze@gmail.com"],
         subject: `${workspace.settings.appName} daily stock brief`,

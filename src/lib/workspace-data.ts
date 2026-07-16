@@ -36,6 +36,7 @@ export async function loadWorkspace(userId: string): Promise<AppWorkspaceState> 
   const organization = organizationResult.data as unknown as Row;
   const profiles = (profilesResult.data ?? []) as Row[];
   const shops = (shopsResult.data ?? []) as Row[];
+  const primaryShop = shops.find((entry) => entry.is_primary) ?? shops[0];
   const productsRows = (productsResult.data ?? []) as Row[];
   const balances = (balancesResult.data ?? []) as Row[];
   const categories = (categoriesResult.data ?? []) as Row[];
@@ -102,6 +103,9 @@ export async function loadWorkspace(userId: string): Promise<AppWorkspaceState> 
     settings: {
       appName: String(organization.app_name ?? "StockFlow"),
       companyName: String(organization.name ?? ""),
+      shopName: String(primaryShop?.name ?? "Main shop"),
+      shopCode: String(primaryShop?.code ?? "MAIN"),
+      shopLocation: String(primaryShop?.location ?? ""),
       reportEmail: String(organization.report_email ?? "tafadzwawilsonsedze@gmail.com"),
       enableAutoSave: Boolean(organization.enable_auto_save ?? true),
       language: organization.preferred_language === "sn" ? "sn" : "en",

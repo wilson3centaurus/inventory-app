@@ -46,6 +46,9 @@ export type RecordedSale = {
 export type AppSettings = {
   appName: string;
   companyName: string;
+  shopName: string;
+  shopCode: string;
+  shopLocation: string;
   reportEmail: string;
   enableAutoSave: boolean;
   language: "en" | "sn";
@@ -67,6 +70,9 @@ export const emptyWorkspace: AppWorkspaceState = {
   settings: {
     appName: "StockFlow",
     companyName: "",
+    shopName: "Main shop",
+    shopCode: "MAIN",
+    shopLocation: "",
     reportEmail: "tafadzwawilsonsedze@gmail.com",
     enableAutoSave: true,
     language: "en",
