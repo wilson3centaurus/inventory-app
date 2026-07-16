@@ -34,7 +34,7 @@ export function AppSidebar() {
       <nav className="mt-7 flex flex-1 flex-col gap-1">
         {allowed.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
-          return <Link key={href} href={href} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold transition ${active ? "bg-surface text-brand-text" : "text-white/68 hover:bg-white/8 hover:text-white"}`}><Icon className="size-[17px]" /><span className="flex-1">{label}</span>{active ? <ChevronRight className="size-3.5" /> : null}</Link>;
+          return <Link key={href} href={href} className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold transition ${active ? "sidebar-active" : "text-white/68 hover:bg-white/8 hover:text-white"}`}><Icon className="size-[17px]" /><span className="flex-1">{label}</span>{active ? <ChevronRight className="size-3.5" /> : null}</Link>;
         })}
       </nav>
       <div className="rounded-[18px] bg-white/8 p-3">

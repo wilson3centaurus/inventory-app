@@ -18,8 +18,8 @@ export function AppHeader({ title, description, action }: { title: string; descr
         <div className="flex shrink-0 items-center gap-2">
           {action}
           <ThemeToggle />
-          <button aria-label="Refresh data" type="button" onClick={() => void refreshWorkspace()} className="grid size-10 place-items-center rounded-[14px] border border-border bg-surface text-muted shadow-sm active:bg-surface-strong"><RefreshCw className={`size-4 ${loadingData ? "animate-spin" : ""}`} /></button>
-          <Link aria-label="Settings" href={currentUser?.role === "OWNER" ? "/settings" : "/profile"} className="grid size-10 place-items-center rounded-[14px] bg-primary text-white"><Settings className="size-4" /></Link>
+          <button aria-label="Refresh data" type="button" onClick={() => void refreshWorkspace()} className="surface-solid grid size-10 place-items-center rounded-[14px] border border-border shadow-sm active:bg-surface-strong"><RefreshCw className={`size-4 ${loadingData ? "animate-spin" : ""}`} /></button>
+          <Link aria-label="Settings" href={currentUser?.role === "OWNER" ? "/settings" : "/profile"} className="primary-solid grid size-10 place-items-center rounded-[14px]"><Settings className="size-4" /></Link>
         </div>
       </header>
       {databaseMessage ? <div className="mb-4 flex items-start gap-2 rounded-2xl border border-danger/20 bg-danger/8 px-3 py-2.5 text-xs text-danger"><CloudOff className="mt-0.5 size-4 shrink-0" /><span>{databaseMessage} Apply the StockFlow database migrations, then refresh.</span></div> : null}
