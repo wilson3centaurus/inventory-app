@@ -16,6 +16,14 @@ type WorkspaceContextValue = {
   login: (email: string, password: string) => Promise<Result>;
   logout: () => Promise<void>;
   createWorkspace: (data: { fullName: string; companyName: string; email: string; password: string }) => Promise<Result>;
+  updateProfile: (updates: {
+    fullName: string;
+    email: string;
+    title: string;
+    companyName?: string;
+    shopName?: string;
+    shopLocation?: string;
+  }) => Promise<Result>;
   updateSettings: (updates: AppSettings) => Promise<Result>;
   createEmployee: (employee: { fullName: string; email: string; password: string; role: "OWNER" | "EMPLOYEE"; title: string }) => Promise<Result>;
   recordSale: (payload: { customerName: string; paymentMethod: string; items: SaleItemInput[] }) => Promise<Result>;
@@ -109,6 +117,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     return { ok: response.ok, message };
   }, [fetchWorkspace, session]);
 
+  const updateProfile = useCallback((updates: {
+    fullName: string;
+    email: string;
+    title: string;
+    companyName?: string;
+    shopName?: string;
+    shopLocation?: string;
+  }) => mutate("/api/profile", "PATCH", updates), [mutate]);
+
   const updateSettings = useCallback((updates: AppSettings) => mutate("/api/settings", "PATCH", updates), [mutate]);
   const createEmployee = useCallback((employee: { fullName: string; email: string; password: string; role: "OWNER" | "EMPLOYEE"; title: string }) => mutate("/api/employees", "POST", employee), [mutate]);
   const recordSale = useCallback((payload: { customerName: string; paymentMethod: string; items: SaleItemInput[] }) => mutate("/api/sales", "POST", payload), [mutate]);
@@ -117,7 +134,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const currentUser = workspace.users.find((user) => user.id === session?.user.id) ?? null;
 
   return (
-    <WorkspaceContext.Provider value={{ appReady, loadingData, isAuthenticated: Boolean(session), currentUser, workspace, databaseMessage, login, logout, createWorkspace, updateSettings, createEmployee, recordSale, addProduct, refreshWorkspace, emailReport }}>
+    <WorkspaceContext.Provider value={{ appReady, loadingData, isAuthenticated: Boolean(session), currentUser, workspace, databaseMessage, login, logout, createWorkspace, updateProfile, updateSettings, createEmployee, recordSale, addProduct, refreshWorkspace, emailReport }}>
       {children}
     </WorkspaceContext.Provider>
   );
