@@ -11,7 +11,7 @@ export function AppHeader({ title, description, action }: { title: string; descr
     <>
       <header className="mb-4 flex items-center justify-between gap-3 pt-1 lg:mb-6">
         <div className="min-w-0">
-          <div className="mb-1 flex items-center gap-1.5 lg:hidden"><span className="size-1.5 rounded-full bg-accent outline outline-2 outline-primary" /><p className="truncate text-[10px] font-extrabold uppercase tracking-[.16em] text-muted">{workspace.settings.appName}</p></div>
+          <div className="mb-1 flex items-center gap-1.5 lg:hidden">{workspace.settings.logoUrl ? <img src={workspace.settings.logoUrl} alt="" className="size-5 rounded-md object-contain" /> : <span className="size-1.5 rounded-full bg-accent outline outline-2 outline-primary" />}<p className="truncate text-[10px] font-extrabold uppercase tracking-[.16em] text-muted">{workspace.settings.appName}</p></div>
           <h1 className="truncate text-[22px] font-extrabold tracking-[-.035em] lg:text-[28px]">{title}</h1>
           <p className="mt-0.5 truncate text-[11px] text-muted lg:text-xs">{description}</p>
         </div>

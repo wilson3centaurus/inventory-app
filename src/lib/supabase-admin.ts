@@ -29,7 +29,11 @@ export async function requireApiUser(request: Request): Promise<User> {
 }
 
 export function apiError(error: unknown) {
-  const message = error instanceof Error ? error.message : "Unexpected request failure.";
+  // Supabase/PostgREST errors are plain objects with a message, not Error instances.
+  const message = error instanceof Error ? error.message
+    : typeof error === "object" && error && typeof (error as { message?: unknown }).message === "string" ? (error as { message: string }).message
+    : "Unexpected request failure.";
+  if (/logo_url/i.test(message)) return Response.json({ message: "Logo upload needs a one-time database update (migration 011_organization_logo.sql). Your other settings are unchanged." }, { status: 503 });
   const status = message === "UNAUTHORIZED" ? 401 : message === "FORBIDDEN" ? 403 : 500;
   return Response.json({ message: status === 500 ? "The database request could not be completed." : message }, { status });
 }

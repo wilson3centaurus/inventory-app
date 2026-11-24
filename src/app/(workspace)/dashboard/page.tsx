@@ -81,7 +81,7 @@ export default function DashboardPage() {
           </div>
         </section>
         <section className="app-card rounded-[22px] p-4">
-          <div className="flex items-center justify-between"><div><p className="eyebrow">Live ledger</p><h2 className="mt-1 text-sm font-extrabold">Recent sales</h2></div><Link href="/sales" className="flex items-center gap-1 text-[10px] font-bold text-primary">View all <ArrowRight className="size-3" /></Link></div>
+          <div className="flex items-center justify-between"><div><p className="eyebrow">Live ledger</p><h2 className="mt-1 text-sm font-extrabold">Recent sales</h2></div><Link href="/reports#sales" className="flex items-center gap-1 text-[10px] font-bold text-primary">View all <ArrowRight className="size-3" /></Link></div>
           <div className="mt-3 space-y-1">
             {workspace.sales.length ? workspace.sales.slice(0, 4).map((sale) => <div key={sale.id} className="flex items-center gap-3 border-b border-border/70 py-2.5 last:border-0"><span className="grid size-8 place-items-center rounded-xl bg-primary/7"><ShoppingBasket className="size-3.5 text-primary" /></span><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-bold">{sale.customerName}</p><p className="mt-0.5 text-[9px] text-muted">{new Date(sale.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · {sale.paymentMethod}</p></div><p className="text-xs font-extrabold">{money.format(sale.totalAmount)}</p></div>) : <Empty text="Your first completed sale will appear here." />}
           </div>

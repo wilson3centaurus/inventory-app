@@ -29,3 +29,26 @@ export async function POST(request: Request) {
     return apiError(error);
   }
 }
+
+/** Owner sets a new password for someone in their own workspace. */
+export async function PATCH(request: Request) {
+  try {
+    const user = await requireApiUser(request);
+    const profile = await getProfile(user.id);
+    if (profile.role !== "OWNER") throw new Error("FORBIDDEN");
+    const body = (await request.json()) as { userId?: string; password?: string };
+    const userId = String(body.userId ?? "");
+    if (!userId || (body.password?.length ?? 0) < 8) return Response.json({ message: "Choose a team member and a password of at least 8 characters." }, { status: 400 });
+
+    const db = getSupabaseAdmin();
+    const { data: member, error: memberError } = await db.from("profiles").select("id, full_name").eq("id", userId).eq("organization_id", String(profile.organization_id)).maybeSingle();
+    if (memberError) throw memberError;
+    if (!member) throw new Error("FORBIDDEN");
+
+    const { error } = await db.auth.admin.updateUserById(userId, { password: body.password });
+    if (error) throw error;
+    return Response.json({ message: `New password set for ${String((member as { full_name?: string }).full_name ?? "team member")}.` });
+  } catch (error) {
+    return apiError(error);
+  }
+}

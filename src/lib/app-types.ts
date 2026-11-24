@@ -30,6 +30,7 @@ export type RecordedSale = {
   id: string;
   customerName: string;
   paymentMethod: string;
+  paymentReference?: string;
   soldBy: string;
   createdAt: string;
   totalAmount: number;
@@ -50,6 +51,7 @@ export type AppSettings = {
   shopCode: string;
   shopLocation: string;
   reportEmail: string;
+  logoUrl: string;
   enableAutoSave: boolean;
   language: "en" | "sn";
 };
@@ -74,6 +76,7 @@ export const emptyWorkspace: AppWorkspaceState = {
     shopCode: "MAIN",
     shopLocation: "",
     reportEmail: "tafadzwawilsonsedze@gmail.com",
+    logoUrl: "",
     enableAutoSave: true,
     language: "en",
   },

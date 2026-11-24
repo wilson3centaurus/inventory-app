@@ -4,6 +4,13 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type Row = Record<string, unknown>;
 const number = (value: unknown) => Number(value ?? 0);
+const PAYMENT_LABELS: Record<string, string> = { cash: "Cash", ecocash: "EcoCash", card: "Card", credit: "Credit" };
+
+/** Stored values look like "cash" or "ecocash SF-XXXX" (EcoCash with its Paynow reference). */
+export function describePaymentMethod(stored: unknown) {
+  const [method = "cash", ...rest] = String(stored ?? "cash").trim().split(/\s+/);
+  return { label: PAYMENT_LABELS[method.toLowerCase()] ?? method, reference: rest.join(" ") };
+}
 
 export async function getProfile(userId: string) {
   const db = getSupabaseAdmin();
@@ -17,21 +24,28 @@ export async function loadWorkspace(userId: string): Promise<AppWorkspaceState> 
   const profile = await getProfile(userId);
   const organizationId = String(profile.organization_id);
 
-  const [organizationResult, profilesResult, shopsResult, productsResult, balancesResult, salesResult, itemsResult, categoriesResult, suppliersResult, suggestionsResult] = await Promise.all([
+  const [organizationResult, profilesResult, shopsResult, productsResult, balancesResult, salesResult, categoriesResult, suppliersResult, suggestionsResult] = await Promise.all([
     db.from("organizations").select("*").eq("id", organizationId).single(),
     db.from("profiles").select("*").eq("organization_id", organizationId).order("created_at"),
     db.from("shops").select("*").eq("organization_id", organizationId),
     db.from("products").select("*").eq("organization_id", organizationId).order("created_at", { ascending: false }),
     db.from("stock_balances").select("*").eq("organization_id", organizationId),
-    db.from("sales").select("*").eq("organization_id", organizationId).order("sold_at", { ascending: false }).limit(100),
-    db.from("sale_items").select("*"),
+    db.from("sales").select("*").eq("organization_id", organizationId).order("sold_at", { ascending: false }).limit(1000),
     db.from("product_categories").select("*").eq("organization_id", organizationId),
     db.from("suppliers").select("*").eq("organization_id", organizationId),
     db.from("restock_recommendations").select("*").eq("organization_id", organizationId).order("generated_at", { ascending: false }).limit(6),
   ]);
 
-  const firstError = [organizationResult, profilesResult, shopsResult, productsResult, balancesResult, salesResult, itemsResult].find((result) => result.error)?.error;
+  const firstError = [organizationResult, profilesResult, shopsResult, productsResult, balancesResult, salesResult].find((result) => result.error)?.error;
   if (firstError) throw firstError;
+
+  const saleIds = ((salesResult.data ?? []) as Row[]).map((sale) => String(sale.id));
+  const saleItems: Row[] = [];
+  for (let index = 0; index < saleIds.length; index += 150) {
+    const { data, error } = await db.from("sale_items").select("*").in("sale_id", saleIds.slice(index, index + 150));
+    if (error) throw error;
+    saleItems.push(...((data ?? []) as Row[]));
+  }
 
   const organization = organizationResult.data as unknown as Row;
   const profiles = (profilesResult.data ?? []) as Row[];
@@ -74,11 +88,11 @@ export async function loadWorkspace(userId: string): Promise<AppWorkspaceState> 
   });
 
   const salesRows = (salesResult.data ?? []) as Row[];
-  const saleItems = (itemsResult.data ?? []) as Row[];
   const sales: RecordedSale[] = salesRows.map((sale) => ({
     id: String(sale.id),
     customerName: String(sale.customer_name ?? "Walk-in"),
-    paymentMethod: String(sale.payment_method),
+    paymentMethod: describePaymentMethod(sale.payment_method).label,
+    paymentReference: describePaymentMethod(sale.payment_method).reference || undefined,
     soldBy: users.find((entry) => entry.id === sale.recorded_by)?.fullName ?? "Team member",
     createdAt: String(sale.sold_at),
     totalAmount: number(sale.total_amount),
@@ -107,6 +121,7 @@ export async function loadWorkspace(userId: string): Promise<AppWorkspaceState> 
       shopCode: String(primaryShop?.code ?? "MAIN"),
       shopLocation: String(primaryShop?.location ?? ""),
       reportEmail: String(organization.report_email ?? "tafadzwawilsonsedze@gmail.com"),
+      logoUrl: String(organization.logo_url ?? ""),
       enableAutoSave: Boolean(organization.enable_auto_save ?? true),
       language: organization.preferred_language === "sn" ? "sn" : "en",
     },

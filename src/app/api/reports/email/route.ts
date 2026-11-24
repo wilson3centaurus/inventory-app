@@ -37,7 +37,10 @@ export async function POST(request: Request) {
         html,
       }),
     });
-    if (!response.ok) throw new Error("Email provider rejected the report. Verify your sender domain in Resend.");
+    if (!response.ok) {
+      const detail = ((await response.json().catch(() => ({}))) as { message?: string }).message;
+      return Response.json({ message: `The email provider rejected the report${detail ? `: ${detail}` : "."} A verified sending domain is needed to email any address.` }, { status: 502 });
+    }
     return Response.json({ message: `Report sent to ${workspace.settings.reportEmail}.` });
   } catch (error) {
     return apiError(error);

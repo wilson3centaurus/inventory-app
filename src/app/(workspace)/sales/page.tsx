@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from "react";
-import { Barcode, Check, Minus, Plus, Search, ShoppingBag, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Barcode, Check, LoaderCircle, Minus, Plus, Search, ShoppingBag, Smartphone, Trash2, X } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { useWorkspace } from "@/components/workspace-provider";
@@ -9,7 +9,11 @@ import { useWorkspace } from "@/components/workspace-provider";
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 export default function SalesPage() {
-  const { workspace, recordSale } = useWorkspace();
+  const { workspace, recordSale, startEcoCash, checkEcoCash } = useWorkspace();
+  const [ecocashPhone, setEcocashPhone] = useState("");
+  const [pending, setPending] = useState<{ ticket: string; message: string } | null>(null);
+  const [feedbackTone, setFeedbackTone] = useState<"ok" | "error">("ok");
+  const polling = useRef(false);
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState<Array<{ productId: string; quantity: number }>>([]);
   const [customerName, setCustomerName] = useState("");
@@ -31,13 +35,48 @@ export default function SalesPage() {
   const total = cart.reduce((sum, line) => { const product = workspace.products.find((entry) => entry.id === line.productId); return sum + (product?.sellingPrice ?? 0) * line.quantity; }, 0);
   const itemCount = cart.reduce((sum, line) => sum + line.quantity, 0);
 
+  const finish = (ok: boolean, message: string) => {
+    setFeedback(message);
+    setFeedbackTone(ok ? "ok" : "error");
+    if (ok) { setCart([]); setCustomerName(""); setEcocashPhone(""); }
+  };
+
   const complete = async () => {
     setSaving(true);
+    if (paymentMethod === "EcoCash") {
+      const started = await startEcoCash({ phone: ecocashPhone, customerName, items: cart });
+      setSaving(false);
+      if (!started.ok || !started.ticket) { finish(false, started.message); return; }
+      setFeedback("");
+      setPending({ ticket: started.ticket, message: started.message });
+      return;
+    }
     const result = await recordSale({ customerName, paymentMethod, items: cart });
     setSaving(false);
-    setFeedback(result.message);
-    if (result.ok) { setCart([]); setCustomerName(""); }
+    finish(result.ok, result.message);
   };
+
+  // Poll Paynow every 4 seconds while an EcoCash prompt is open (one request at a time).
+  const pendingTicket = pending?.ticket;
+  useEffect(() => {
+    if (!pendingTicket) return;
+    let cancelled = false;
+    const tick = async () => {
+      if (polling.current || cancelled) return;
+      polling.current = true;
+      const result = await checkEcoCash(pendingTicket);
+      polling.current = false;
+      if (cancelled) return;
+      if (result.state === "pending" || result.state === "error") { setPending((current) => current && { ...current, message: result.message }); return; }
+      setPending(null);
+      setFeedback(result.message);
+      setFeedbackTone(result.state === "paid" ? "ok" : "error");
+      if (result.state === "paid") { setCart([]); setCustomerName(""); setEcocashPhone(""); }
+    };
+    const timer = window.setInterval(() => void tick(), 4000);
+    void tick();
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [pendingTicket, checkEcoCash]);
 
   const captured = (code: string) => {
     const product = workspace.products.find((entry) => entry.barcode === code);
@@ -50,7 +89,7 @@ export default function SalesPage() {
   return (
     <>
       <AppHeader title="New sale" description="Scan, tap, charge. Stock updates instantly." />
-      {feedback ? <div className="mb-3 flex items-center gap-2 rounded-[14px] bg-primary px-3 py-2.5 text-[11px] font-semibold text-white"><Check className="size-3.5 text-accent" />{feedback}</div> : null}
+      {feedback ? <div className={`mb-3 flex items-center gap-2 rounded-[14px] px-3 py-2.5 text-[11px] font-semibold ${feedbackTone === "ok" ? "bg-primary text-white" : "bg-danger/10 text-danger"}`}>{feedbackTone === "ok" ? <Check className="size-3.5 text-accent" /> : <X className="size-3.5" />}<span className="flex-1">{feedback}</span><button type="button" aria-label="Dismiss" onClick={() => setFeedback("")}><X className="size-3.5 opacity-60" /></button></div> : null}
       <div className="grid gap-3 xl:grid-cols-[1.15fr_.85fr]">
         <section className="app-card rounded-[22px] p-3 sm:p-4">
           <div className="flex gap-2"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" /><input className="field w-full rounded-[14px] pl-9 pr-3 text-xs" placeholder="Search products" value={query} onChange={(event) => setQuery(event.target.value)} /></div><button type="button" aria-label="Scan item" onClick={() => setScanner(true)} className="grid size-11 place-items-center rounded-[14px] bg-accent text-accent-ink"><Barcode className="size-[18px]" /></button></div>
@@ -74,11 +113,13 @@ export default function SalesPage() {
           <div className="mt-3 border-t border-border pt-3">
             <input aria-label="Customer name" className="field w-full rounded-[14px] px-3 text-xs" placeholder="Customer name (optional)" value={customerName} onChange={(event) => setCustomerName(event.target.value)} />
             <div className="mt-2 grid grid-cols-4 gap-1.5">{["Cash", "EcoCash", "Card", "Credit"].map((method) => <button type="button" key={method} onClick={() => setPaymentMethod(method)} className={`rounded-xl px-1 py-2 text-[9px] font-bold ${paymentMethod === method ? "bg-primary text-white" : "bg-surface-strong text-muted"}`}>{method}</button>)}</div>
+            {paymentMethod === "EcoCash" ? <div className="relative mt-2"><Smartphone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" /><input aria-label="Customer EcoCash number" inputMode="tel" autoComplete="tel" className="field w-full rounded-[14px] pl-9 pr-3 text-xs" placeholder="Customer EcoCash number, e.g. 0771234567" value={ecocashPhone} onChange={(event) => setEcocashPhone(event.target.value)} /></div> : null}
             <div className="my-3 flex items-end justify-between"><div><p className="eyebrow">Amount due</p><p className="mt-1 text-[10px] text-muted">{paymentMethod} payment</p></div><p className="text-2xl font-extrabold tracking-[-.04em]">{money.format(total)}</p></div>
-            <button type="button" disabled={!cart.length || saving} onClick={() => void complete()} className="primary-button w-full px-4 text-xs">{saving ? "Completing transaction..." : `Charge ${money.format(total)}`}</button>
+            <button type="button" disabled={!cart.length || saving || Boolean(pending) || (paymentMethod === "EcoCash" && ecocashPhone.replace(/\D/g, "").length < 9)} onClick={() => void complete()} className="primary-button w-full px-4 text-xs">{saving ? (paymentMethod === "EcoCash" ? "Sending EcoCash prompt..." : "Completing transaction...") : paymentMethod === "EcoCash" ? `Request ${money.format(total)} via EcoCash` : `Charge ${money.format(total)}`}</button>
           </div>
         </aside>
       </div>
+      {pending ? <div className="fixed inset-0 z-[80] grid place-items-center bg-primary/50 p-4 backdrop-blur-sm"><div className="w-full max-w-sm rounded-[26px] bg-surface p-6 text-center shadow-2xl"><span className="mx-auto grid size-14 place-items-center rounded-[20px] bg-accent text-accent-ink"><Smartphone className="size-6" /></span><h2 className="mt-4 text-lg font-extrabold">Waiting for EcoCash</h2><p className="mt-1 text-2xl font-extrabold tracking-tight">{money.format(total)}</p><p className="mt-3 flex items-center justify-center gap-2 text-[11px] leading-5 text-muted"><LoaderCircle className="size-4 shrink-0 animate-spin" />{pending.message}</p><p className="mt-3 text-[9px] text-muted">The sale is saved automatically once the payment is confirmed.</p><button type="button" onClick={() => { setPending(null); finish(false, "Stopped waiting for EcoCash. If the customer already paid, check Paynow before charging again."); }} className="mt-5 w-full rounded-[14px] border border-border px-4 py-2.5 text-[11px] font-bold text-muted">Stop waiting</button></div></div> : null}
       <BarcodeScanner open={scanner} onClose={() => setScanner(false)} onCapture={captured} />
     </>
   );

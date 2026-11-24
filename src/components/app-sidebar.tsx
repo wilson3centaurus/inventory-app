@@ -16,8 +16,9 @@ export const navItems: Array<{ href: string; label: string; shortLabel: string; 
   { href: "/profile", label: "My profile", shortLabel: "Me", icon: UserRound, roles: ["OWNER", "EMPLOYEE"] },
 ];
 
-function BrandMark() {
-  return <span className="grid size-9 place-items-center rounded-[13px] bg-accent text-primary-deep"><Sparkles className="size-[18px]" strokeWidth={2.4} /></span>;
+export function BrandMark({ logoUrl }: { logoUrl?: string }) {
+  if (logoUrl) return <span className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-[13px] bg-white"><img src={logoUrl} alt="" className="size-full object-contain" /></span>;
+  return <span className="grid size-9 shrink-0 place-items-center rounded-[13px] bg-accent text-primary-deep"><Sparkles className="size-[18px]" strokeWidth={2.4} /></span>;
 }
 
 export function AppSidebar() {
@@ -28,7 +29,7 @@ export function AppSidebar() {
   return (
     <aside className="sticky top-4 hidden h-[calc(100dvh-2rem)] flex-col rounded-[24px] bg-primary p-3 text-white shadow-[0_20px_60px_rgba(14,45,38,.16)] lg:flex">
       <div className="flex items-center gap-3 px-2 py-2">
-        <BrandMark />
+        <BrandMark logoUrl={workspace.settings.logoUrl} />
         <div className="min-w-0"><p className="truncate text-[15px] font-extrabold">{workspace.settings.appName}</p><p className="truncate text-[10px] text-white/55">{workspace.settings.companyName || "Inventory workspace"}</p></div>
       </div>
       <nav className="mt-7 flex flex-1 flex-col gap-1">

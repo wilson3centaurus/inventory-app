@@ -5,6 +5,7 @@ import { Barcode, Boxes, ChevronRight, CircleAlert, Mic, PackagePlus, Search, Sl
 import { AppHeader } from "@/components/app-header";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { useWorkspace } from "@/components/workspace-provider";
+import { ProductSheet } from "@/components/product-sheet";
 
 const emptyForm = { name: "", category: "", barcode: "", sku: "", supplier: "", costPrice: "", sellingPrice: "", stock: "", minStock: "", expiryDate: "" };
 const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
@@ -56,6 +57,8 @@ export default function InventoryPage() {
   const [feedback, setFeedback] = useState("");
   const [saving, setSaving] = useState(false);
   const [listening, setListening] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const editing = workspace.products.find((product) => product.id === editingId) ?? null;
   const speechSupported = Boolean(getSpeechRecognitionConstructor());
   const products = workspace.products.filter((product) => (filter === "all" || product.stock <= product.minStock) && `${product.name} ${product.sku} ${product.barcode}`.toLowerCase().includes(query.toLowerCase()));
   const lowCount = workspace.products.filter((product) => product.stock <= product.minStock).length;
@@ -64,6 +67,7 @@ export default function InventoryPage() {
     const existing = workspace.products.find((product) => product.barcode === code);
     if (existing) {
       setQuery(code);
+      setEditingId(existing.id);
       setFeedback(`${existing.name} found in inventory.`);
     } else {
       setForm((current) => ({ ...current, barcode: code }));
@@ -137,13 +141,14 @@ export default function InventoryPage() {
       <section className="app-card mt-3 overflow-hidden rounded-[22px]">
         {products.length ? <div className="divide-y divide-border/80">{products.map((product) => {
           const low = product.stock <= product.minStock;
-          return <article key={product.id} className="flex items-center gap-3 px-3 py-3 transition hover:bg-surface-soft sm:px-4"><div className={`grid size-11 shrink-0 place-items-center rounded-[15px] ${low ? "bg-danger/8 text-danger" : "bg-primary/7 text-primary"}`}><Boxes className="size-[18px]" /></div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="truncate text-xs font-extrabold">{product.name}</p>{low ? <CircleAlert className="size-3 shrink-0 text-danger" /> : null}</div><p className="mt-1 truncate font-mono text-[9px] text-muted">{product.sku}{product.barcode ? ` · ${product.barcode}` : ""}</p><p className="mt-1 text-[9px] text-muted">{product.category} · {money.format(product.sellingPrice)}</p></div><div className="text-right"><p className={`text-base font-extrabold ${low ? "text-danger" : ""}`}>{product.stock}</p><p className="text-[8px] uppercase tracking-wide text-muted">in stock</p></div><ChevronRight className="size-3.5 text-muted/50" /></article>;
+          return <button type="button" onClick={() => setEditingId(product.id)} key={product.id} className="flex w-full items-center gap-3 px-3 py-3 text-left transition hover:bg-surface-soft sm:px-4"><div className={`grid size-11 shrink-0 place-items-center rounded-[15px] ${low ? "bg-danger/8 text-danger" : "bg-primary/7 text-primary"}`}><Boxes className="size-[18px]" /></div><div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="truncate text-xs font-extrabold">{product.name}</p>{low ? <CircleAlert className="size-3 shrink-0 text-danger" /> : null}</div><p className="mt-1 truncate font-mono text-[9px] text-muted">{product.sku}{product.barcode ? ` · ${product.barcode}` : ""}</p><p className="mt-1 text-[9px] text-muted">{product.category} · {money.format(product.sellingPrice)}</p></div><div className="text-right"><p className={`text-base font-extrabold ${low ? "text-danger" : ""}`}>{product.stock}</p><p className="text-[8px] uppercase tracking-wide text-muted">in stock</p></div><ChevronRight className="size-3.5 text-muted/50" /></button>;
         })}</div> : <div className="grid min-h-64 place-items-center px-6 text-center"><div><span className="mx-auto grid size-12 place-items-center rounded-[18px] bg-primary/7 text-primary"><Boxes className="size-5" /></span><h2 className="mt-3 text-sm font-extrabold">{workspace.products.length ? "No matching products" : "Your shelves are ready"}</h2><p className="mx-auto mt-1 max-w-xs text-[11px] leading-5 text-muted">{workspace.products.length ? "Try a different search or stock filter." : "Scan a barcode or add your first product to the live database."}</p>{!workspace.products.length ? <button type="button" onClick={() => setShowForm(true)} className="primary-button mt-4 px-4 text-xs">Add first product</button> : null}</div></div>}
       </section>
 
       {showForm ? <div className="fixed inset-0 z-[70] flex items-end bg-primary/45 p-2 backdrop-blur-sm mobile-sheet-padding sm:items-center sm:justify-center"><form onSubmit={submit} className="max-h-[calc(100dvh-6.5rem-env(safe-area-inset-bottom))] w-full overflow-y-auto rounded-[26px] bg-surface p-4 shadow-2xl sm:max-h-[92dvh] sm:max-w-2xl sm:p-5"><div className="sticky top-0 z-10 flex items-center justify-between bg-surface pb-3"><div><p className="eyebrow">Live inventory</p><h2 className="mt-1 text-lg font-extrabold">Add product</h2></div><div className="flex items-center gap-2"><button type="button" onClick={startVoiceEntry} className="flex min-h-9 items-center gap-1.5 rounded-xl border border-border bg-surface px-3 text-[10px] font-bold text-brand-text disabled:opacity-55" disabled={!speechSupported || listening}><Mic className="size-3.5" /> {listening ? "Listening..." : "Voice"}</button><button aria-label="Close" type="button" onClick={() => setShowForm(false)} className="grid size-9 place-items-center rounded-xl bg-surface-strong"><X className="size-4" /></button></div></div><div className="grid gap-3 sm:grid-cols-2">{[
           ["name", "Product name", "e.g. Mazoe Orange 2L", "text"], ["barcode", "Barcode / QR", "Scan or enter code", "text"], ["sku", "SKU", "Unique stock code", "text"], ["category", "Category", "Groceries", "text"], ["supplier", "Supplier", "Supplier name", "text"], ["costPrice", "Cost price", "0.00", "number"], ["sellingPrice", "Selling price", "0.00", "number"], ["stock", "Opening stock", "0", "number"], ["minStock", "Low-stock level", "0", "number"], ["expiryDate", "Expiry date", "", "date"],
         ].map(([key, label, placeholder, type]) => <label key={key} className="space-y-1.5"><span className="text-[10px] font-bold text-muted">{label}</span><input required={key === "name" || key === "sku"} type={type} step={type === "number" ? "0.01" : undefined} className="field w-full rounded-[14px] px-3 text-xs" placeholder={placeholder} value={form[key as keyof typeof form]} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} /></label>)}</div><div className="mt-4 flex gap-2"><button type="button" onClick={() => setShowScanner(true)} className="flex min-h-11 items-center gap-2 rounded-[14px] border border-border px-4 text-xs font-bold"><Barcode className="size-4" /> Scan</button><button disabled={saving} className="primary-button flex-1 px-4 text-xs">{saving ? "Saving to database..." : "Save product"}</button></div></form></div> : null}
+      {editing ? <ProductSheet key={editing.id} product={editing} onClose={() => setEditingId(null)} onDone={(message) => { setEditingId(null); setFeedback(message); }} /> : null}
       <BarcodeScanner open={showScanner} onClose={() => setShowScanner(false)} onCapture={capture} />
     </>
   );

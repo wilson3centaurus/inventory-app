@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase";
 import { emptyWorkspace, type AppSettings, type AppUser, type AppWorkspaceState, type Product, type SaleItemInput } from "@/lib/app-types";
 
 type Result = { ok: boolean; message: string };
+export type ProductUpdate = { id: string; name?: string; barcode?: string; costPrice?: number; sellingPrice?: number; minStock?: number; expiryDate?: string | null; stockChange?: number; reason?: "RESTOCK" | "DAMAGE" | "COUNT" };
 type WorkspaceContextValue = {
   appReady: boolean;
   loadingData: boolean;
@@ -26,8 +27,13 @@ type WorkspaceContextValue = {
   }) => Promise<Result>;
   updateSettings: (updates: AppSettings) => Promise<Result>;
   createEmployee: (employee: { fullName: string; email: string; password: string; role: "OWNER" | "EMPLOYEE"; title: string }) => Promise<Result>;
+  changePassword: (passwords: { currentPassword: string; newPassword: string }) => Promise<Result>;
+  resetEmployeePassword: (userId: string, password: string) => Promise<Result>;
   recordSale: (payload: { customerName: string; paymentMethod: string; items: SaleItemInput[] }) => Promise<Result>;
   addProduct: (product: Omit<Product, "id">) => Promise<Result>;
+  updateProduct: (update: ProductUpdate) => Promise<Result>;
+  startEcoCash: (payload: { phone: string; customerName: string; items: SaleItemInput[] }) => Promise<Result & { ticket?: string }>;
+  checkEcoCash: (ticket: string) => Promise<Result & { state: "pending" | "paid" | "failed" | "paid_unrecorded" | "error" }>;
   refreshWorkspace: () => Promise<void>;
   emailReport: () => Promise<Result>;
 };
@@ -128,13 +134,42 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = useCallback((updates: AppSettings) => mutate("/api/settings", "PATCH", updates), [mutate]);
   const createEmployee = useCallback((employee: { fullName: string; email: string; password: string; role: "OWNER" | "EMPLOYEE"; title: string }) => mutate("/api/employees", "POST", employee), [mutate]);
+  const changePassword = useCallback(async (passwords: { currentPassword: string; newPassword: string }) => {
+    if (!session) return { ok: false, message: "Your session has expired. Sign in again." };
+    const response = await fetch("/api/profile/password", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify(passwords) });
+    const message = await readMessage(response);
+    if (!response.ok) return { ok: false, message };
+    // Refresh the session with the new password so this device stays signed in.
+    const email = session.user.email;
+    if (email) {
+      const { data } = await getSupabaseBrowserClient().auth.signInWithPassword({ email, password: passwords.newPassword });
+      if (data.session) setSession(data.session);
+    }
+    return { ok: true, message };
+  }, [session]);
+  const resetEmployeePassword = useCallback((userId: string, password: string) => mutate("/api/employees", "PATCH", { userId, password }), [mutate]);
   const recordSale = useCallback((payload: { customerName: string; paymentMethod: string; items: SaleItemInput[] }) => mutate("/api/sales", "POST", payload), [mutate]);
   const addProduct = useCallback((product: Omit<Product, "id">) => mutate("/api/products", "POST", product), [mutate]);
+  const updateProduct = useCallback((update: ProductUpdate) => mutate("/api/products", "PATCH", update), [mutate]);
+  const startEcoCash = useCallback(async (payload: { phone: string; customerName: string; items: SaleItemInput[] }) => {
+    if (!session) return { ok: false, message: "Your session has expired. Sign in again." };
+    const response = await fetch("/api/payments/ecocash", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify(payload) });
+    const data = (await response.json().catch(() => ({}))) as { message?: string; ticket?: string };
+    return { ok: response.ok && Boolean(data.ticket), message: data.message ?? "EcoCash request failed.", ticket: data.ticket };
+  }, [session]);
+  const checkEcoCash = useCallback(async (ticket: string) => {
+    if (!session) return { ok: false, state: "error" as const, message: "Your session has expired. Sign in again." };
+    const response = await fetch("/api/payments/ecocash/status", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ ticket }) });
+    const data = (await response.json().catch(() => ({}))) as { message?: string; state?: "pending" | "paid" | "failed" | "paid_unrecorded" };
+    const state: "pending" | "paid" | "failed" | "paid_unrecorded" | "error" = data.state ?? "error";
+    if (state === "paid") await fetchWorkspace(session);
+    return { ok: state === "paid", state, message: data.message ?? "Could not check the EcoCash payment." };
+  }, [fetchWorkspace, session]);
   const emailReport = useCallback(() => mutate("/api/reports/email", "POST", {}), [mutate]);
   const currentUser = workspace.users.find((user) => user.id === session?.user.id) ?? null;
 
   return (
-    <WorkspaceContext.Provider value={{ appReady, loadingData, isAuthenticated: Boolean(session), currentUser, workspace, databaseMessage, login, logout, createWorkspace, updateProfile, updateSettings, createEmployee, recordSale, addProduct, refreshWorkspace, emailReport }}>
+    <WorkspaceContext.Provider value={{ appReady, loadingData, isAuthenticated: Boolean(session), currentUser, workspace, databaseMessage, login, logout, createWorkspace, updateProfile, updateSettings, createEmployee, changePassword, resetEmployeePassword, recordSale, addProduct, updateProduct, startEcoCash, checkEcoCash, refreshWorkspace, emailReport }}>
       {children}
     </WorkspaceContext.Provider>
   );

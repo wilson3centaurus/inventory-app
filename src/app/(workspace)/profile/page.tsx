@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from "react";
-import { Building2, Check, LogOut, Mail, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import { Building2, Check, KeyRound, LogOut, Mail, MapPin, ShieldCheck, UserRound } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { useWorkspace } from "@/components/workspace-provider";
 
 export default function ProfilePage() {
-  const { currentUser, workspace, logout, updateProfile } = useWorkspace();
+  const { currentUser, workspace, logout, updateProfile, changePassword } = useWorkspace();
 
   if (!currentUser) {
     return (
@@ -18,6 +18,7 @@ export default function ProfilePage() {
   }
 
   return (
+    <>
     <ProfileForm
       key={`${currentUser.id}-${workspace.settings.companyName}-${currentUser.email}`}
       currentUser={currentUser}
@@ -26,6 +27,44 @@ export default function ProfilePage() {
       onLogout={logout}
       onSave={updateProfile}
     />
+    <PasswordForm onChange={changePassword} />
+    </>
+  );
+}
+
+function PasswordForm({ onChange }: { onChange: (passwords: { currentPassword: string; newPassword: string }) => Promise<{ ok: boolean; message: string }> }) {
+  const empty = { currentPassword: "", newPassword: "", confirmPassword: "" };
+  const [form, setForm] = useState(empty);
+  const [saving, setSaving] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (form.newPassword !== form.confirmPassword) { setResult({ ok: false, message: "The new passwords do not match." }); return; }
+    setSaving(true);
+    const outcome = await onChange({ currentPassword: form.currentPassword, newPassword: form.newPassword });
+    setSaving(false);
+    setResult(outcome);
+    if (outcome.ok) setForm(empty);
+  };
+  const fields: Array<[keyof typeof empty, string, string]> = [["currentPassword", "Current password", "current-password"], ["newPassword", "New password", "new-password"], ["confirmPassword", "Confirm new password", "new-password"]];
+  return (
+    <form onSubmit={submit} className="app-card mt-3 rounded-[22px] p-4">
+      <div className="flex items-center gap-2">
+        <span className="grid size-9 place-items-center rounded-[14px] bg-accent text-primary"><KeyRound className="size-4" /></span>
+        <div><p className="eyebrow">Security</p><h2 className="mt-1 text-sm font-extrabold">Change password</h2></div>
+      </div>
+      {result ? <div className={`mt-3 rounded-[14px] px-3 py-2.5 text-[11px] ${result.ok ? "bg-primary/7 text-primary" : "bg-danger/8 text-danger"}`}>{result.message}</div> : null}
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {fields.map(([key, label, autoComplete]) => (
+          <label key={key} className="space-y-1.5">
+            <span className="text-[10px] font-bold text-muted">{label}</span>
+            <input required type="password" autoComplete={autoComplete} minLength={key === "currentPassword" ? undefined : 8} className="field w-full rounded-[14px] px-3 text-xs" value={form[key]} onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))} />
+          </label>
+        ))}
+      </div>
+      <p className="mt-2 text-[9px] text-muted">At least 8 characters. You stay signed in on this device.</p>
+      <button disabled={saving} className="primary-button mt-4 w-full px-4 text-xs sm:w-auto">{saving ? "Changing password..." : "Change password"}</button>
+    </form>
   );
 }
 
@@ -116,8 +155,9 @@ function ProfileForm({
               <input required className="field w-full rounded-[14px] px-3 text-xs" value={form.fullName} onChange={(event) => setForm((current) => ({ ...current, fullName: event.target.value }))} />
             </label>
             <label className="space-y-1.5">
-              <span className="text-[10px] font-bold text-muted">Account email</span>
-              <input required type="email" className="field w-full rounded-[14px] px-3 text-xs" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
+              <span className="text-[10px] font-bold text-muted">Sign-in email</span>
+              <input required type="email" autoComplete="email" className="field w-full rounded-[14px] px-3 text-xs" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
+              {form.email.trim().toLowerCase() !== currentUser.email.toLowerCase() ? <p className="text-[9px] text-muted">After saving, sign in with this new email.</p> : null}
             </label>
             <label className="space-y-1.5 sm:col-span-2">
               <span className="text-[10px] font-bold text-muted">Job title</span>
